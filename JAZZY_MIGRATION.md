@@ -23,6 +23,8 @@ git checkout ros2
 git submodule update --init --recursive
 ```
 
+**Note**: The `data_tools` submodule uses a custom fork at `https://github.com/rtkg/data_tools.git` (branch: `ros2`) instead of the original `agilexrobotics/data_tools` repository. This fork contains the necessary Jazzy migration changes detailed below.
+
 ## Summary of Changes
 
 Three main categories of changes were required:
