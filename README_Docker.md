@@ -37,10 +37,32 @@ Starts an interactive container with:
 - `install/` pre-built inside the image
 - Network and device access via `--privileged` and `--network=host`
 
-### With GUI Support
+### Attach to Running Container
 
 ```bash
-make docker_run_x
+make docker_exec
 ```
 
-Same as above, but runs `xhost +local:root` first to allow GUI applications (rviz2, rqt, etc.) to display.
+Opens a new shell in an already running container.
+
+## Libsurvive Calibration
+
+### Calibrate Lighthouses
+
+Run this inside the container to calibrate the lighthouse positions:
+
+```bash
+cd ~/pika_ros/install/libsurvive/bin && ./survive-cli --force-calibrate
+```
+
+Keep the tracker stationary during calibration. The terminal should show no positioning errors when calibration completes successfully.
+
+### Verify Calibration
+
+To verify calibration is working and stream raw observations:
+
+```bash
+cd ~/pika_ros/install/libsurvive/bin && ./survive-cli --use-raw-obs 1 --show-raw-obs 1 --record-stdout 1
+```
+
+You should see continuous pose data streaming when the tracker is in view of the lighthouses.

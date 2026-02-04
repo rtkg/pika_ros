@@ -103,10 +103,11 @@ RUN cd librealsense-2.55.1 && \
     cd /tmp && rm -rf /tmp/build
 
 # Install Python packages
+# Pin numpy<2 and opencv-python==4.8.1.78 for cv_bridge compatibility
 RUN pip3 install \
-    numpy \
+    'numpy<2' \
     scipy \
-    opencv-python \
+    opencv-python==4.8.1.78 \
     pyserial \
     transforms3d
 
@@ -117,6 +118,9 @@ RUN cd /root/pika_ros && \
     unzip install.zip && \
     chmod 777 -R install/ && \
     rm install.zip
+
+# Create libsurvive config directory for calibration persistence
+RUN mkdir -p /root/.config/libsurvive
 
 # Source ROS Humble and workspace in bashrc (as per manual)
 RUN echo "source /opt/ros/humble/setup.bash" >> /root/.bashrc && \
