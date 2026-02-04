@@ -5,11 +5,15 @@ DOCKER_USER_UID := $(shell id -u)
 docker_build:
 	docker build -t pika_ros_$(USER):latest .
 
+docker_build_clean:
+	docker build --no-cache -t pika_ros_$(USER):latest .
+
 docker_run:
 	mkdir -p $(HOME)/.docker_bash_history_pika && \
 	docker run -it --rm --network=host --privileged \
 		--name pika_ros_$(USER) \
 		--ipc=host \
+		-v /dev:/dev \
 		-v $(BASE)/src:/root/pika_ros/src \
 		-v $(BASE)/scripts:/root/pika_ros/scripts \
 		-v $(HOME)/.docker_bash_history_pika:/root/.bash_history \

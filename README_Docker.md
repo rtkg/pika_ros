@@ -5,64 +5,68 @@
 - Docker installed on host
 - X11 (for GUI applications like rviz2)
 
+## Build & Run
+
+```bash
+make docker_build    # Build image
+make docker_run      # Start container
+make docker_exec     # Attach to running container
+```
+
 ## Host Setup (One-time)
 
-### USB/udev Rules
-
-The Vive tracker udev rules must be installed on the **host** (not inside Docker):
+### Vive Tracker
 
 ```bash
 sudo cp scripts/81-vive.rules /etc/udev/rules.d/
 sudo udevadm control --reload-rules && sudo udevadm trigger
 ```
 
-If the wireless receiver is already plugged in, unplug and replug it after this step.
+Unplug and replug the wireless receiver after this step.
 
-## Build
+### PIKA Devices (2 PikaSense + 2 Grippers)
+
+Devices use udev rules based on USB topology. **Keep devices plugged into the same ports after setup.**
+
+1. Find USB paths for each device (plug in one at a time):
+   ```bash
+   udevadm info -a /dev/ttyUSBX | grep KERNELS | head -3   # Serial port
+   udevadm info -a /dev/videoX | grep KERNELS | head -3    # Fisheye camera
+   ```
+
+2. Edit setup scripts with discovered KERNELS paths:
+   - `scripts/setup_multi_sensor.bash` → ttyUSB50/51, video50/51
+   - `scripts/setup_multi_gripper.bash` → ttyUSB60/61, video60/61
+
+3. Edit start scripts with RealSense serial numbers (`rs-enumerate-devices -s`):
+   - `scripts/start_multi_sensor.bash`
+   - `scripts/start_multi_gripper.bash`
+
+4. Run setup scripts on **host**, then unplug/replug all devices:
+   ```bash
+   bash scripts/setup_multi_sensor.bash
+   bash scripts/setup_multi_gripper.bash
+   ls -la /dev/ttyUSB{50,51,60,61} /dev/video{50,51,60,61}  # Verify symlinks
+   ```
+
+## Running (Inside Docker)
 
 ```bash
-make docker_build
+# Terminal 1 - Start 2 PikaSense
+# Launches: 2x RealSense D405, 2x fisheye cameras, 2x serial IMU, locator, rviz
+bash scripts/start_multi_sensor.bash
+
+# Terminal 2 - Start 2 PIKA Grippers
+# Launches: 2x RealSense D405, 2x fisheye cameras, 2x serial grippers
+bash scripts/start_multi_gripper.bash
 ```
-
-Builds the `pika_ros_<username>:latest` image.
-
-## Run
-
-```bash
-make docker_run
-```
-
-Starts an interactive container with:
-- `src/` mounted from host for development
-- `install/` pre-built inside the image
-- Network and device access via `--privileged` and `--network=host`
-
-### Attach to Running Container
-
-```bash
-make docker_exec
-```
-
-Opens a new shell in an already running container.
 
 ## Libsurvive Calibration
 
-### Calibrate Lighthouses
-
-Run this inside the container to calibrate the lighthouse positions:
-
 ```bash
+# Calibrate lighthouses (keep tracker stationary)
 cd ~/pika_ros/install/libsurvive/bin && ./survive-cli --force-calibrate
-```
 
-Keep the tracker stationary during calibration. The terminal should show no positioning errors when calibration completes successfully.
-
-### Verify Calibration
-
-To verify calibration is working and stream raw observations:
-
-```bash
+# Verify calibration
 cd ~/pika_ros/install/libsurvive/bin && ./survive-cli --use-raw-obs 1 --show-raw-obs 1 --record-stdout 1
 ```
-
-You should see continuous pose data streaming when the tracker is in view of the lighthouses.

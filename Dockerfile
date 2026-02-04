@@ -103,11 +103,10 @@ RUN cd librealsense-2.55.1 && \
     cd /tmp && rm -rf /tmp/build
 
 # Install Python packages
-# Pin numpy<2 and opencv-python==4.8.1.78 for cv_bridge compatibility
 RUN pip3 install \
-    'numpy<2' \
+    numpy==1.26.4 \
     scipy \
-    opencv-python==4.8.1.78 \
+    opencv-python==4.6.0.66 \
     pyserial \
     transforms3d
 

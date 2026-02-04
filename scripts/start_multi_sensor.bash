@@ -1,10 +1,14 @@
+#!/bin/bash
+# Start 2 PikaSense (sensors)
+# Sensor L: USB hub 1-4, RealSense 323622270938
+# Sensor R: USB hub 1-3, RealSense 323622272476
 
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 camera_fps=30
 camera_width=640
 camera_height=480
-l_depth_camera_no=230322272110
-r_depth_camera_no=230322270988
+l_depth_camera_no=323622270938
+r_depth_camera_no=323622272476
 
 l_serial_port=/dev/ttyUSB50
 r_serial_port=/dev/ttyUSB51
